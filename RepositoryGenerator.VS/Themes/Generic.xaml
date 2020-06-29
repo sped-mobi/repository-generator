@@ -1,0 +1,243 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:theme="clr-namespace:Microsoft.VisualStudio.RepositoryGenerator.Themes"
+    xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:vsui="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Microsoft.VisualStudio.RepositoryGenerator.VS;component/Themes/Theme.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <SolidColorBrush x:Key="Theme.Environment.Background">#FF252526</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.Environment.Foreground">#FFF1F1F1</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.Environment.BorderBrush">#FF595959</SolidColorBrush>
+
+    <SolidColorBrush x:Key="Theme.Button.Background">#FF3F3F46</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.Button.Foreground">#FFF1F1F1</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.Button.BorderBrush">#FF007ACC</SolidColorBrush>
+
+    <SolidColorBrush x:Key="Theme.TextBox.Background">#FF333337</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.TextBox.Foreground">#FFF1F1F1</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.TextBox.BorderBrush">#FF434346</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.TextBox.CaretBrush">#EEE2E2E2</SolidColorBrush>
+
+    <SolidColorBrush x:Key="Theme.Label.Background">#FF252526</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.Label.Foreground">#FFF1F1F1</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.Label.BorderBrush">#FF252526</SolidColorBrush>
+
+    <SolidColorBrush x:Key="Theme.CheckBox.Background">#FF252526</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.CheckBox.Foreground">#FFF1F1F1</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.CheckBox.BorderBrush">#FF007ACC</SolidColorBrush>
+
+    <SolidColorBrush x:Key="Theme.ComboBox.Background">#FF333337</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.ComboBox.Foreground">#FFF1F1F1</SolidColorBrush>
+    <SolidColorBrush x:Key="Theme.ComboBox.BorderBrush">#FF252526</SolidColorBrush>
+
+
+    <Style x:Key="TextBoxBaseStyle" TargetType="{x:Type TextBox}">
+        <Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Light" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Background" Value="{StaticResource Theme.TextBox.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.TextBox.Foreground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.TextBox.BorderBrush}" />
+        <Setter Property="CaretBrush" Value="{StaticResource Theme.TextBox.CaretBrush}" />
+    </Style>
+
+    <Style x:Key="ButtonBaseStyle" TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="75" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Regular" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Background" Value="{StaticResource Theme.Button.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Button.Foreground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Button.BorderBrush}" />
+    </Style>
+
+    <Style x:Key="TextBlockBaseStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Regular" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style x:Key="ProgressBarBaseStyle" TargetType="{x:Type ProgressBar}">
+        <Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="AutomationProperties.LiveSetting" Value="Assertive" />
+        <Setter Property="Background" Value="{StaticResource Theme.Button.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Button.Foreground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Button.BorderBrush}" />
+    </Style>
+
+
+    <Style x:Key="LabelBaseStyle" TargetType="{x:Type Label}">
+        <Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="27" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Light" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Background" Value="{StaticResource Theme.Label.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Label.Foreground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Label.BorderBrush}" />
+    </Style>
+
+    <Style x:Key="CheckBoxBaseStyle" TargetType="{x:Type CheckBox}">
+        <Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Light" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Background" Value="{StaticResource Theme.CheckBox.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.CheckBox.Foreground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.CheckBox.BorderBrush}" />
+    </Style>
+
+    <Style x:Key="ComboBoxBaseStyle" TargetType="{x:Type ComboBox}">
+        <Setter Property="AllowDrop" Value="True" />
+        <Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Light" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Bottom" />
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <DataTemplate.Resources>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="FontFamily" Value="SegoeUI" />
+                            <Setter Property="FontWeight" Value="Light" />
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <!--<Setter Property="Background" Value="{StaticResource Theme.TextBox.Background}" />
+                            <Setter Property="Foreground" Value="{StaticResource Theme.TextBox.Foreground}" />-->
+                        </Style>
+                    </DataTemplate.Resources>
+                    <StackPanel>
+                        <TextBlock Text="{Binding}" />
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <!--<Setter Property="Margin" Value="7,0,7,0" />
+        <Setter Property="Height" Value="25" />
+        <Setter Property="FontFamily" Value="SegoeUI" />
+        <Setter Property="FontWeight" Value="Light" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Background" Value="{StaticResource Theme.ComboBox.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.ComboBox.Foreground}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.ComboBox.BorderBrush}" />
+        <Setter Property="ScrollViewer.Background" Value="{StaticResource Theme.ComboBox.Background}" />
+        <Setter Property="ScrollViewer.Foreground" Value="{StaticResource Theme.ComboBox.Foreground}" />-->
+        <!--<Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate x:Name="templateRoot" TargetType="{x:Type ComboBox}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="0" MinWidth="{DynamicResource {x:Static SystemParameters.VerticalScrollBarWidthKey}}" />
+                        </Grid.ColumnDefinitions>
+                        <Popup
+                            x:Name="PART_Popup"
+                            Grid.ColumnSpan="2"
+                            Margin="1"
+                            AllowsTransparency="true"
+                            IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                            Placement="Bottom"
+                            PopupAnimation="{DynamicResource {x:Static SystemParameters.ComboBoxPopupAnimationKey}}">
+                            <Border
+                                x:Name="dropDownBorder"
+                                MinWidth="{Binding ActualWidth, ElementName=templateRoot}"
+                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}"
+                                BorderBrush="{StaticResource Theme.ComboBox.BorderBrush}"
+                                BorderThickness="1">
+                                <ScrollViewer x:Name="DropDownScrollViewer">
+                                    <Grid x:Name="grid" RenderOptions.ClearTypeHint="Enabled">
+                                        <Canvas
+                                            x:Name="canvas"
+                                            Width="0"
+                                            Height="0"
+                                            HorizontalAlignment="Left">
+
+                                            <TextBlock />
+                                        </Canvas>
+                                        <ItemsPresenter
+                                            x:Name="ItemsPresenter"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Center"
+                                            KeyboardNavigation.DirectionalNavigation="Contained"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                    </Grid>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                        <ToggleButton
+                            x:Name="toggleButton"
+                            Grid.ColumnSpan="2"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                             />
+                        <ContentPresenter
+                            x:Name="contentPresenter"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                            IsHitTestVisible="false"
+                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>-->
+    </Style>
+
+
+    <Style BasedOn="{StaticResource ProgressBarBaseStyle}" TargetType="{x:Type ProgressBar}" />
+    <Style BasedOn="{StaticResource TextBlockBaseStyle}" TargetType="{x:Type TextBlock}" />
+    <Style BasedOn="{StaticResource TextBoxBaseStyle}" TargetType="{x:Type TextBox}" />
+    <Style BasedOn="{StaticResource ButtonBaseStyle}" TargetType="{x:Type Button}" />
+    <Style BasedOn="{StaticResource LabelBaseStyle}" TargetType="{x:Type Label}" />
+    <Style BasedOn="{StaticResource ComboBoxBaseStyle}" TargetType="{x:Type ComboBox}" />
+    <Style BasedOn="{StaticResource CheckBoxBaseStyle}" TargetType="{x:Type CheckBox}" />
+
+
+
+    <Style BasedOn="{StaticResource RadioButtonBaseStyle}" TargetType="{x:Type RadioButton}" />
+    <Style BasedOn="{StaticResource RadioViewboxBaseStyle}" TargetType="{x:Type Viewbox}" />
+
+
+
+</ResourceDictionary>

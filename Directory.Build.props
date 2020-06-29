@@ -1,0 +1,64 @@
+<Project>
+
+
+  <PropertyGroup>
+
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+
+    <Deterministic>true</Deterministic>
+    
+    <MinimumVisualStudioVersion>$(VisualStudioVersion)</MinimumVisualStudioVersion>
+
+    <Configuration Condition="'$(Condition)'==''">Debug</Configuration>
+    
+    <Platform>AnyCPU</Platform>
+    <LangVersion>latest</LangVersion>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <ForceGenerationOfBindingRedirects Condition="'$(GenerateMSBuildBindingRedirects)' != ''">true</ForceGenerationOfBindingRedirects>
+    <AutoGenerateBindingRedirects Condition="'$(ForceGenerationOfBindingRedirects)' == 'true'">true</AutoGenerateBindingRedirects>
+    
+    <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+    <RepositoryDirectory>$([System.IO.Path]::GetFullPath('$(SolutionDir)'))</RepositoryDirectory>
+    <RepositoryDirectory Condition="!HasTrailingSlash('$(RepositoryDirectory)')">$(RepositoryDirectory)\</RepositoryDirectory>
+
+    <ArtifactsDirectory>$(RepositoryDirectory)bin</ArtifactsDirectory>
+    
+    <OutputPath>$(ArtifactsDirectory)\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <BaseIntermediateOutputPath>$(RepositoryDirectory)bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Configuration)\</IntermediateOutputPath>
+
+    <RulesDirectory>$(SolutionDir)Rules\</RulesDirectory>
+    
+    
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);1591;1701;1702;1705;VSTHRD010;VSSDK006</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+
+
+  <PropertyGroup>
+    <VersionSuffix>beta</VersionSuffix>
+    <Company>Sped Mobi</Company>
+    <Product>Repository Generator</Product>
+    <Copyright>%A9 $([System.DateTime]::Now.Year) $(Company). All Rights Reserved.</Copyright>
+    <!--<AssemblyVersion>$(Version)</AssemblyVersion>-->
+  </PropertyGroup>
+
+
+  <Import Project="VisualStudio.props" Condition="'$(UsingToolVsSDK)'=='true'"/>
+
+</Project>

@@ -1,0 +1,282 @@
+﻿<ui:DialogWindow
+    x:Class="Microsoft.VisualStudio.RepositoryGenerator.UI.NewRepositoryDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:abs="clr-namespace:Microsoft.VisualStudio.RepositoryGenerator.Abstractions;assembly=Microsoft.VisualStudio.RepositoryGenerator.Abstractions"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:generic="clr-namespace:System.Collections.Generic;assembly=System"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:local="clr-namespace:Microsoft.VisualStudio.RepositoryGenerator.UI"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+    xmlns:vsui="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+    Title="New Repository"
+    Width="707"
+    Height="475.064"
+    Background="{DynamicResource Theme.Environment.Background}"
+    BorderBrush="{DynamicResource Theme.Environment.BorderBrush}"
+    Foreground="{DynamicResource Theme.Environment.Foreground}"
+    FontSize="16"
+    FontWeight="Regular"
+    HasHelpButton="True"
+    HasMaximizeButton="True"
+    HasMinimizeButton="True"
+    TextOptions.TextFormattingMode="Ideal"
+    TextOptions.TextRenderingMode="Auto"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <ui:DialogWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Microsoft.VisualStudio.RepositoryGenerator.VS;component/Themes/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ObjectDataProvider
+                x:Key="TargetFrameworkDataProvider"
+                MethodName="GetValues"
+                ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="abs:TargetFramework" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <ObjectDataProvider
+                x:Key="SdkXmlLocationsDataProvider"
+                MethodName="GetValues"
+                ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="abs:SdkXmlElementLocation" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+
+            <ObjectDataProvider
+                x:Key="RepositoryStylesDataProvider"
+                MethodName="GetValues"
+                ObjectType="{x:Type sys:Enum}">
+                <ObjectDataProvider.MethodParameters>
+                    <x:Type TypeName="abs:RepositoryStyle" />
+                </ObjectDataProvider.MethodParameters>
+            </ObjectDataProvider>
+
+            <local:RepositoryGeneratorParameters
+                x:Key="DesignData"
+                Description="Sample Description"
+                Output="C:\output"
+                ProjectName="MyProject"
+                RepositoryName="MyRepository"
+                RepositoryStyle="Default"
+                RootNamespace="RootNamespace"
+                SdkXmlLocation="Sdk"
+                SolutionName="MySolution"
+                TargetFramework="NetStandard_2_0" />
+
+
+        </ResourceDictionary>
+    </ui:DialogWindow.Resources>
+    <Grid
+        x:Name="MainGrid"
+        Margin="15"
+        >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="45" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+                <RowDefinition Height="32" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0">Repository Name:</Label>
+            <TextBox
+                x:Name="RepositoryNameTextBox"
+                Grid.Row="0"
+                Grid.Column="1"
+                TabIndex="0"
+                Text="{Binding RepositoryName, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                TextChanged="OnRepositoryNameTextChanged" />
+            <CheckBox
+                x:Name="AutoFillCheckBox"
+                Grid.Row="0"
+                Grid.Column="2"
+                Margin="7,0,-33,0"
+                Content="Auto Fill Values"
+                IsChecked="True"
+                TabIndex="10" />
+
+
+            <Label Grid.Row="1" Grid.Column="0">Solution Name:</Label>
+            <TextBox
+                x:Name="SolutionNameTextBox"
+                Grid.Row="1"
+                Grid.Column="1"
+                TabIndex="1"
+                Text="{Binding SolutionName, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Label Grid.Row="2" Grid.Column="0">Project Name:</Label>
+            <TextBox
+                x:Name="ProjectNameTextBox"
+                Grid.Row="2"
+                Grid.Column="1"
+                TabIndex="2"
+                Text="{Binding ProjectName, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Label Grid.Row="3" Grid.Column="0">Root Namespace:</Label>
+            <TextBox
+                x:Name="RootNamespaceTextBox"
+                Grid.Row="3"
+                Grid.Column="1"
+                TabIndex="3"
+                Text="{Binding RootNamespace, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Label Grid.Row="4" Grid.Column="0">Description:</Label>
+            <TextBox
+                x:Name="DescriptionTextBox"
+                Grid.Row="4"
+                Grid.Column="1"
+                TabIndex="4"
+                Text="{Binding Description, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Label Grid.Row="5" Grid.Column="0">Target Framework:</Label>
+            <ComboBox
+                x:Name="TargetFrameworkComboBox"
+                Grid.Row="5"
+                Grid.Column="1"
+                ItemsSource="{Binding Source={StaticResource TargetFrameworkDataProvider}, Mode=OneWay}"
+                SelectedItem="{Binding TargetFramework, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                SelectedValue="{Binding TargetFramework, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                SnapsToDevicePixels="True"
+                TabIndex="5" />
+
+            <Label Grid.Row="6" Grid.Column="0">Sdk Xml Location:</Label>
+            <ComboBox
+                x:Name="SdkXmlLocationComboBox"
+                Grid.Row="6"
+                Grid.Column="1"
+                ItemsSource="{Binding Source={StaticResource SdkXmlLocationsDataProvider}, Mode=OneWay}"
+                SelectedItem="{Binding SdkXmlLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                SelectedValue="{Binding SdkXmlLocation, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                TabIndex="6" />
+
+            <Label Grid.Row="7" Grid.Column="0">Repository Style:</Label>
+            <ComboBox
+                x:Name="RepositoryStyleComboBox"
+                Grid.Row="7"
+                Grid.Column="1"
+                ItemsSource="{Binding Source={StaticResource RepositoryStylesDataProvider}, Mode=OneWay}"
+                SelectedItem="{Binding RepositoryStyle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                SelectedValue="{Binding RepositoryStyle, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+                TabIndex="7" />
+
+            <Label Grid.Row="8" Grid.Column="0">Output Path:</Label>
+            <TextBox
+                x:Name="OutputPathTextBox"
+                Grid.Row="8"
+                Grid.Column="1"
+                TabIndex="8"
+                Text="{Binding Output, Mode=TwoWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" />
+            <Button
+                Grid.Row="8"
+                Grid.Column="2"
+                Width="Auto"
+                Margin="13,4,20,4"
+                HorizontalAlignment="Stretch"
+                Click="OnBrowseButtonClick"
+                Content="Browse..."
+                FontSize="12"
+                TabIndex="9" />
+        </Grid>
+        <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Margin="10"
+                Padding="15,4"
+                Click="OnOKButtonClick"
+                Content="OK"
+                IsDefault="True"
+                TabIndex="10" />
+            <Button
+                Margin="10"
+                Padding="15,4"
+                Click="OnCancelButtonClick"
+                Content="Cancel"
+                IsCancel="True"
+                TabIndex="11" />
+        </StackPanel>
+    </Grid>
+</ui:DialogWindow>
+<!--<Grid.RowDefinitions>
+      <RowDefinition Height="auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="45" />
+    </Grid.RowDefinitions>
+
+    <TextBlock>New Repository</TextBlock>
+
+    <Grid Grid.Row="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="30"/>
+        <RowDefinition Height="30"/>
+        <RowDefinition Height="30"/>
+        <RowDefinition Height="30"/>
+        <RowDefinition Height="30"/>
+        <RowDefinition Height="30"/>
+      </Grid.RowDefinitions>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="120" />
+        <ColumnDefinition Width="300" />
+        <ColumnDefinition Width="80" />
+      </Grid.ColumnDefinitions>
+
+
+
+      <TextBox Text="{Binding RepositoryName}" Grid.Row="0" Grid.Column="1"/>
+      <Label Grid.Row="1" Grid.Column="0">Solution Name:</Label>
+      <TextBox Text="{Binding SolutionName}" Grid.Row="1" Grid.Column="1"/>
+      <Label Grid.Row="2" Grid.Column="0">Project Name:</Label>
+      <TextBox Text="{Binding ProjectName}" Grid.Row="2" Grid.Column="1"/>
+
+      <Label Grid.Row="3" Grid.Column="0">RootNamespace:</Label>
+      <TextBox Text="{Binding RootNamespace}" Grid.Row="3" Grid.Column="1"/>
+
+      <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
+        <Label Width="120">Target Framework:</Label>
+        <ComboBox SelectedValue="{Binding TargetFramework}" Width="180" SelectedIndex="0">
+          <ComboBoxItem>netcoreapp2.2</ComboBoxItem>
+          <ComboBoxItem>netcoreapp2.1</ComboBoxItem>
+          <ComboBoxItem>netstandard2.0</ComboBoxItem>
+          <ComboBoxItem>net472</ComboBoxItem>
+        </ComboBox>
+      </StackPanel>
+
+      <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="120"/>
+          <ColumnDefinition Width="300"/>
+          <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Label>Output:</Label>
+        <TextBox Text="{Binding Output}" Grid.Column="1"/>
+        <Button Grid.Column="2">Browse...</Button>
+      </Grid>
+
+   </Grid>-->

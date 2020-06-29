@@ -1,0 +1,42 @@
+﻿<Project>
+  <PropertyGroup>
+    <UsingToolVsSDK>true</UsingToolVsSDK>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>RepositoryGenerator.vsix</AssemblyName>
+    <RootNamespace>RepositoryGenerator.vsix</RootNamespace>
+    <TargetVsixContainerName>RepositoryGenerator.vsix</TargetVsixContainerName>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <ItemGroup>
+    <None Remove="*.html" />
+    <None Remove="License.txt" />
+    <None Remove="Repository.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="source.extension.vsixmanifest" SubType="Designer" CodeGenerator="" />
+    <Content Include="*.html" IncludeInVsix="true" CopyToOutputDirectory="Always" />
+    <Content Include="License.txt" IncludeInVsix="true" CopyToOutputDirectory="Always" />
+    <Content Include="Repository.png" IncludeInVsix="true" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RepositoryGenerator.Abstractions\RepositoryGenerator.Abstractions.csproj">
+      <Name>RepositoryGenerator.Abstractions</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\RepositoryGenerator.Implementation\RepositoryGenerator.Implementation.csproj">
+      <Name>RepositoryGenerator.Implementation</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3bPkgdefProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\RepositoryGenerator.VS\RepositoryGenerator.VS.csproj">
+      <Name>RepositoryGenerator.VS</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3bPkgdefProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

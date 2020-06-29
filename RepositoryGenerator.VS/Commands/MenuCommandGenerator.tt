@@ -1,0 +1,673 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#"
+#><#@ assembly name="System.Core"
+#><#@ assembly name="Microsoft.Build"
+#><#@ assembly name="Microsoft.Build.Framework"
+#><#@ assembly name="System.Data"
+#><#@ assembly name="System.Data.Linq"
+#><#@ assembly name="EnvDTE"
+#><#@ assembly name="EnvDTE80"
+#><#@ assembly name="EnvDTE90"
+#><#@ assembly name="EnvDTE100"
+#><#@ assembly name="System.Xml"
+#><#@ assembly name="System.Xml.Linq"
+#><#@ import namespace="System"
+#><#@ import namespace="Microsoft.Build.Construction"
+#><#@ import namespace="Microsoft.Build.Evaluation"
+#><#@ import namespace="Microsoft.Build.Exceptions"
+#><#@ import namespace="Microsoft.Build.Framework"
+#><#@ import namespace="Microsoft.Build.Execution"
+#><#@ import namespace="Microsoft.Build.Logging"
+#><#@ import namespace="EnvDTE80"
+#><#@ import namespace="EnvDTE90"
+#><#@ import namespace="Microsoft.CSharp"
+#><#@ import namespace="System.CodeDom"
+#><#@ import namespace="System.CodeDom.Compiler"
+#><#@ import namespace="System.Collections.Generic"
+#><#@ import namespace="System.Data.Linq"
+#><#@ import namespace="System.Data.Linq.Mapping"
+#><#@ import namespace="System.IO"
+#><#@ import namespace="System.Globalization"
+#><#@ import namespace="System.Linq"
+#><#@ import namespace="System.Reflection"
+#><#@ import namespace="System.Text"
+#><#@ import namespace="System.Xml"
+#><#@ import namespace="System.Xml.Linq"
+#><#@ import namespace="System.Xml.Serialization"
+#><#@ import namespace="Microsoft.VisualStudio.TextTemplating"
+#><#@ import namespace="Microsoft.VisualStudio.TextTemplating.VSHost"
+#><#@ output extension=".cs" #>
+<#
+    Manager manager = Manager.Create(this.Host, this.GenerationEnvironment);
+
+    string vsctFilePath = this.Host.ResolvePath("CommandTable.vsct");
+    XDocument xdoc = XDocument.Load(vsctFilePath);
+
+    string code = CodeWriter.WriteCodeString(CodeTypeGenerator.GenerateCompileUnit(xdoc, "Microsoft.VisualStudio.RepositoryGenerator.Commands"));
+
+    WriteLine(code);
+
+#>
+<#+
+
+    // Visual Studio Helper Methods
+    internal EnvDTE.Project CurrentProject(string templateFile)
+    {
+        return GetDTE2().Solution.FindProjectItem(templateFile).ContainingProject;
+    }
+    internal EnvDTE80.DTE2 GetDTE2()
+    {
+        IServiceProvider serviceProvider = (IServiceProvider)this.Host;
+        EnvDTE80.DTE2 dte = (EnvDTE80.DTE2) serviceProvider.GetService(typeof(EnvDTE.DTE));
+        return dte;
+    }
+    internal string GetRootNamespace(string templateFile)
+    {
+        return GetDTE2().Solution.FindProjectItem(templateFile).ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
+    }
+    internal string GetCustomToolNamespace(string templateFile)
+    {
+        return GetDTE2().Solution.FindProjectItem(templateFile).Properties.Item("CustomToolNamespace").Value.ToString();
+    }
+    internal IEnumerable<EnvDTE.ProjectItem> GetAllProjectItems(EnvDTE.ProjectItems collection, bool recursive = true)
+    {
+        foreach (EnvDTE.ProjectItem item in collection)
+        {
+            yield return item;
+            if (recursive)
+            {
+                var children = GetAllProjectItems(item.ProjectItems, recursive);
+                if (children != null)
+                    foreach (var childItem in children)
+                        yield return childItem;
+            }
+        }
+    }
+
+    internal static class CodeWriter
+    {
+        public static string WriteCodeString(CodeCompileUnit obj)
+        {
+            StringBuilder sb = new StringBuilder();
+            using (StringWriter sw = new StringWriter(sb))
+            {
+                CodeGeneratorOptions options = new CodeGeneratorOptions();
+                options.BlankLinesBetweenMembers = false;
+                options.BracingStyle = "C";
+                options.ElseOnClosing = true;
+                options.IndentString = "    ";
+
+                CSharpCodeProvider provider = new CSharpCodeProvider();
+
+                provider.GenerateCodeFromCompileUnit(obj, sw, options);
+            }
+
+            return sb.ToString();
+            
+        }
+    }
+
+    internal static class CodeTypeGenerator
+    {
+        public static CodeCompileUnit GenerateCompileUnit(XDocument xdoc, string @namespace)
+        {
+            CodeCompileUnit unit = new CodeCompileUnit();
+            CodeNamespace ns = new CodeNamespace(@namespace);
+            unit.Namespaces.Add(ns);
+            ns.Imports.Add(NamespaceImports.System);
+            ns.Imports.Add(NamespaceImports.SystemComponentModelDesign);
+            ns.Imports.Add(NamespaceImports.MicrosoftVisualStudioShell);
+
+            ns.Types.Add(GenerateGuidSymbolsClass(xdoc));
+            ns.Types.Add(GenerateIDSymbolsClass(xdoc));
+            ns.Types.Add(GenerateCommandsClass(xdoc));
+            ns.Types.Add(GenerateAbstractCommandHandlerClass(xdoc));
+            ns.Types.Add(GenerateCommandHandlerClass(xdoc));
+            ns.Types.Add(GenerateCommandRegistrarClass(xdoc));
+
+            return unit;
+        }
+        public static CodeTypeDeclaration GenerateGuidSymbolsClass(XDocument xdoc)
+        {
+            CodeTypeDeclaration codeType = new CodeTypeDeclaration("GuidSymbols");
+            codeType.IsClass = true;
+            codeType.IsPartial = true;
+            codeType.TypeAttributes = (codeType.TypeAttributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NotPublic;
+            XElement xelement = xdoc.Root.Element(XNames.Symbols);
+            foreach (XElement element in xelement.Elements(XNames.GuidSymbol))
+            {
+                string str = element.Attribute("name").Value + "String";
+                string guid = element.Attribute("value").Value.TrimStart('{').TrimEnd('}');
+                codeType.Members.Add(GenerateConstantStringField(str, guid));
+            }
+            foreach (XElement element in xelement.Elements(XNames.GuidSymbol))
+            {
+                string str = element.Attribute("name").Value;
+                
+                codeType.Members.Add(GenerateGuidField(str));
+            }
+
+            return codeType;
+        }
+
+        private static CodeMemberField GenerateConstantStringField(string name, string initValue)
+        {
+            CodeMemberField field = new CodeMemberField();
+            field.Name = name;
+            field.Type = References.String;
+            field.Attributes = MemberAttributes.Const | MemberAttributes.Public;
+            field.InitExpression = new CodePrimitiveExpression(initValue);
+            return field;
+        }
+
+        private static CodeMemberField GenerateConstantIntField(string name, int initValue)
+        {
+            CodeMemberField field = new CodeMemberField();
+            field.Name = name;
+            field.Type = References.Int;
+            field.Attributes = MemberAttributes.Const | MemberAttributes.Public;
+            field.InitExpression = new CodePrimitiveExpression(initValue);
+            return field;
+        }
+
+        private static CodeMemberField GenerateGuidField(string name)
+        {
+            string strString = name + "String";
+
+            CodeObjectCreateExpression objCreate = new CodeObjectCreateExpression()
+            {
+                CreateType = References.Guid,
+                    
+            };
+            objCreate.Parameters.Add(new CodeFieldReferenceExpression(null, strString));
+
+            CodeMemberField field = new CodeMemberField();
+            field.Name = name;
+            field.Type = References.Guid;
+            field.Attributes = MemberAttributes.Static | MemberAttributes.Public;
+            field.InitExpression = objCreate;
+
+            return field;
+        }
+
+        private static CodeMemberField GenerateCommandIDField(string commandName, string commandSetName)
+        {
+            string name = NameGenerator.GenerateCommandIDName(commandName);
+
+            CodeObjectCreateExpression objCreate = new CodeObjectCreateExpression()
+            {
+                CreateType = References.CommandID,
+                    
+            };
+            objCreate.Parameters.Add(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("GuidSymbols") , commandSetName));
+            objCreate.Parameters.Add(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("IDSymbols"), commandName));
+
+            CodeMemberField field = new CodeMemberField();
+            field.Name = name;
+            field.Type = References.CommandID;
+            field.Attributes = MemberAttributes.Static | MemberAttributes.Public;
+            field.InitExpression = objCreate;
+
+            return field;
+        }
+
+        private static CodeMemberMethod GenerateFacadeCommandMethod(string methodName, string commandName)
+        {
+            CodeMemberMethod method = new CodeMemberMethod();
+            method.Name = methodName;
+            method.Attributes = MemberAttributes.Public | MemberAttributes.Overloaded;
+            method.ReturnType = References.Void;
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.Object, "sender"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.EventArgs, "e"));
+            method.Comments.Add(new CodeCommentStatement("<summary>", true));
+            method.Comments.Add(new CodeCommentStatement($"When overridden in a derived class, handles the {commandName} command.", true));
+            method.Comments.Add(new CodeCommentStatement("</summary>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"sender\">The <see cref=\"object\"/> initiating the command.</param>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"e\">The <see cref=\"EventArgs\"/> that will ultimately handle the command.</param>", true));
+            return method;
+        }
+
+        private static CodeMemberMethod GenerateRegisterCommandsMethod(XDocument xdoc)
+        {
+            CodeMemberMethod method = new CodeMemberMethod();
+            method.Name = Constants.MethodNames.RegisterCommands;
+            method.Attributes = MemberAttributes.Static | MemberAttributes.Public;
+            method.ReturnType = References.Void;
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.OleMenuCommandService, "service"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.CommandHandler, "handler"));
+            method.Comments.Add(new CodeCommentStatement("<summary>", true));
+            method.Comments.Add(new CodeCommentStatement($"Registers the commands.", true));
+            method.Comments.Add(new CodeCommentStatement("</summary>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"service\">the <see cref=\"OleMenuCommandService\"/> that services the commands</param>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"handler\">the <see cref=\"CommandHandler\"/> class containing all of the handlers to the commands</param>", true));
+            XElement xelement = xdoc.Root.Element(XNames.Commands).Element(XNames.Buttons);
+            if (xelement != null && xelement.HasElements)
+            {
+                foreach (XElement element in xelement.Elements(XNames.Button))
+                {
+                    string id = element.Attribute("id").Value;
+                    string commandIdName = NameGenerator.GenerateCommandIDName(id);
+                    string commandHandlerName = NameGenerator.GenerateExecuteCommandMethodName(id);
+
+                    CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression()
+                    {
+                        Method = new CodeMethodReferenceExpression(null, Constants.MethodNames.RegisterCommand)
+                    };
+                    invoke.Parameters.Add(new CodeVariableReferenceExpression("service"));
+                    invoke.Parameters.Add(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("Commands"), commandIdName));
+                    invoke.Parameters.Add(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("handler"), commandHandlerName));
+                    method.Statements.Add(invoke);
+
+
+                }
+
+            }
+            if (xelement != null && xelement.HasElements)
+            {
+                foreach (XElement element in xelement.Elements(XNames.Button))
+                {
+                    string id = element.Attribute("id").Value;
+                    string commandIdName = NameGenerator.GenerateCommandIDName(id);
+                    string commandHandlerName = NameGenerator.GenerateExecuteCommandMethodName(id);
+
+                    CodeMethodInvokeExpression invoke = new CodeMethodInvokeExpression()
+                    {
+                        Method = new CodeMethodReferenceExpression(new CodeVariableReferenceExpression("Logger") , "Log")
+                        
+                    };
+                    invoke.Parameters.Add(new CodePrimitiveExpression($"Registering command {id}..."));
+                    method.Statements.Add(invoke);
+                }
+            }            
+            return method;
+        }
+
+        private static CodeMemberMethod GenerateRegisterCommandMethod(XDocument xdoc)
+        {
+            CodeMemberMethod method = new CodeMemberMethod();
+            method.Name = Constants.MethodNames.RegisterCommand;
+            method.Attributes = MemberAttributes.Static | MemberAttributes.Private;
+            method.ReturnType = References.Void;
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.OleMenuCommandService, "service"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.CommandID, "cmdId"));
+            method.Parameters.Add(new CodeParameterDeclarationExpression(References.EventHandler, "commandHandler"));
+            method.Comments.Add(new CodeCommentStatement("<summary>", true));
+            method.Comments.Add(new CodeCommentStatement($"Registers a command.", true));
+            method.Comments.Add(new CodeCommentStatement("</summary>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"service\">the OleCommandService that services the commands</param>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"cmdId\">the CommandID that identifies the command</param>", true));
+            method.Comments.Add(new CodeCommentStatement("<param name=\"commandHanlder\">the EventHandler responsible for handling the command</param>", true));
+
+            CodeObjectCreateExpression objCreate = new CodeObjectCreateExpression();
+            objCreate.CreateType = References.OleMenuCommand;
+            objCreate.Parameters.Add(new CodeFieldReferenceExpression(null, "commandHandler"));
+            objCreate.Parameters.Add(new CodeFieldReferenceExpression(null, "cmdId"));
+            CodeVariableDeclarationStatement commandStatement = new CodeVariableDeclarationStatement()
+            {
+                Name = "command",
+                Type = References.OleMenuCommand,
+                InitExpression = objCreate
+            };
+            method.Statements.Add(commandStatement);
+            method.Statements.Add(
+                new CodeMethodInvokeExpression(
+                    new CodeFieldReferenceExpression(null, "service"), "AddCommand", new CodeVariableReferenceExpression("command")));
+            return method;
+        }
+
+        public static CodeTypeDeclaration GenerateIDSymbolsClass(XDocument xdoc)
+        {
+            CodeTypeDeclaration codeType = new CodeTypeDeclaration("IDSymbols");
+            codeType.IsClass = true;
+            codeType.IsPartial = true;
+            codeType.TypeAttributes = (codeType.TypeAttributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NotPublic;
+            codeType.Comments.Add(new CodeCommentStatement("<summary>", true));
+            codeType.Comments.Add(new CodeCommentStatement("Represents the <see cref=\"IDSymbols\"/> class.", true));
+            codeType.Comments.Add(new CodeCommentStatement("</summary>", true));
+
+            foreach (XContainer element1 in xdoc.Root.Element(XNames.Symbols).Elements(XNames.GuidSymbol))
+            {
+                foreach (XElement element2 in element1.Elements(XNames.IDSymbol))
+                {
+                    string name = element2.Attribute("name").Value;
+                    int int32 = Convert.ToInt32(element2.Attribute("value").Value, 16);
+                    codeType.Members.Add(GenerateConstantIntField(name,int32));
+                }
+            }
+
+            return codeType;
+        }
+
+        public static CodeTypeDeclaration GenerateCommandsClass(XDocument xdoc)
+        {
+            CodeTypeDeclaration codeType = new CodeTypeDeclaration("Commands");
+            codeType.IsClass = true;
+            codeType.IsPartial = true;
+            codeType.TypeAttributes = (codeType.TypeAttributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NotPublic;
+            codeType.Comments.Add(new CodeCommentStatement("<summary>", true));
+            codeType.Comments.Add(new CodeCommentStatement("Represents the <see cref=\"Commands\"/> class.", true));
+            codeType.Comments.Add(new CodeCommentStatement("</summary>", true));
+            XElement xelement = xdoc.Root.Element(XNames.Commands).Element(XNames.Buttons);
+            if (xelement != null && xelement.HasElements)
+            {
+                foreach (XElement element in xelement.Elements(XNames.Button))
+                {
+                    string str = element.Attribute("id").Value;
+                    string nameForButtonName = GetGuidSymbolNameForButtonName(xdoc, str);
+                    codeType.Members.Add(GenerateCommandIDField(str,nameForButtonName));
+                }
+            }
+
+            return codeType;
+        }
+
+        public static string GetGuidSymbolNameForButtonName(XDocument vsctDocument, string buttonName)
+        {
+            string str = string.Empty;
+            foreach (XElement element1 in vsctDocument.Root.Element(XNames.Symbols).Elements(XNames.GuidSymbol))
+            {
+                string id = element1.Attribute("name").Value;
+                string guid = element1.Attribute("value").Value;
+
+                foreach (XElement element2 in element1.Elements(XNames.IDSymbol))
+                {
+                    if (element2.Attribute("name").Value == buttonName)
+                        str = element1.Attribute("name").Value;
+                }
+            }
+            return str;
+        }
+
+        public static CodeTypeDeclaration GenerateAbstractCommandHandlerClass(XDocument xdoc)
+        {
+            CodeTypeDeclaration codeType = new CodeTypeDeclaration("AbstractCommandHandler");
+            codeType.IsClass = true;
+            codeType.IsPartial = true;
+            codeType.TypeAttributes = (codeType.TypeAttributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NotPublic | TypeAttributes.Abstract;
+            codeType.Comments.Add(new CodeCommentStatement("<summary>", true));
+            codeType.Comments.Add(new CodeCommentStatement(" Serves as the abstract base for classes that handle commands.", true));
+            codeType.Comments.Add(new CodeCommentStatement("</summary>", true));
+
+            CodeConstructor ctor = new CodeConstructor();
+            ctor.Attributes = MemberAttributes.Family | MemberAttributes.Override;
+            ctor.Comments.Add(new CodeCommentStatement("<summary>", true));
+            ctor.Comments.Add(new CodeCommentStatement($" Initializes a new instance of the <see cref=\"{codeType.Name}\"/> class.", true));
+            ctor.Comments.Add(new CodeCommentStatement("</summary>", true));
+            codeType.Members.Add(ctor);
+
+            XElement xelement = xdoc.Root.Element(XNames.Commands).Element(XNames.Buttons);
+            if (xelement != null && xelement.HasElements)
+            {
+                foreach (XElement element in xelement.Elements(XNames.Button))
+                {
+                    string id = element.Attribute("id").Value;
+                    string commandName1 = NameGenerator.GenerateExecuteCommandMethodName(id);
+                    codeType.Members.Add(GenerateFacadeCommandMethod(commandName1,id));
+
+                }
+            }
+
+            return codeType;
+        }
+        public static CodeTypeDeclaration GenerateCommandHandlerClass(XDocument xdoc)
+        {
+            CodeTypeDeclaration codeType = new CodeTypeDeclaration("CommandHandler");
+            codeType.BaseTypes.Add(new CodeTypeReference("AbstractCommandHandler"));
+            codeType.IsClass = true;
+            codeType.IsPartial = true;
+            codeType.TypeAttributes = (codeType.TypeAttributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NotPublic;
+            codeType.Comments.Add(new CodeCommentStatement("<summary>", true));
+            codeType.Comments.Add(new CodeCommentStatement(" Entry point for handling commands.", true));
+            codeType.Comments.Add(new CodeCommentStatement("</summary>", true));
+
+            return codeType;
+        }
+
+        public static CodeTypeDeclaration GenerateCommandRegistrarClass(XDocument xdoc)
+        {
+            CodeTypeDeclaration codeType = new CodeTypeDeclaration("CommandRegistrar");
+            codeType.IsClass = true;
+            codeType.IsPartial = true;
+            codeType.TypeAttributes = (codeType.TypeAttributes & ~TypeAttributes.VisibilityMask) | TypeAttributes.NotPublic;
+            codeType.Comments.Add(new CodeCommentStatement("<summary>", true));
+            codeType.Comments.Add(new CodeCommentStatement(" Does the job no one else will do, and registers the commands.", true));
+            codeType.Comments.Add(new CodeCommentStatement("</summary>", true));
+            codeType.Members.Add(GenerateRegisterCommandsMethod(xdoc));
+            codeType.Members.Add(GenerateRegisterCommandMethod(xdoc));
+            return codeType;
+        }
+    }
+
+    internal static class Constants
+    {
+        public static class MethodNames
+        {
+            public const string RegisterCommands = "RegisterCommands";
+            public const string RegisterCommand = "RegisterCommand";
+        }
+
+        public static class ClassNames
+        {
+            public const string IDSymbols = "IDSymbols";
+            public const string GuidSymbols = "GuidSymbols";
+            public const string AbstractCommandHandler = "AbstractCommandHandler";
+            public const string CommandHandler = "CommandHandler";
+            public const string CommandRegistrar = "CommandRegistrar";
+            public const string CommandID = "CommandID";
+            public const string CommandIds = nameof(CommandIds);
+            public const string EventArgs = "EventArgs";
+            public const string EventHandler = nameof(EventHandler);
+            public const string OleMenuCommand = nameof(OleMenuCommand);
+            public const string OleMenuCommandService = "OleMenuCommandService";
+        }
+
+        public static class VariableNames
+        {
+            public const string Service = "service";
+            public const string Facade = "facade";
+            public const string Sender = "sender";
+            public const string E = "e";
+        }
+    }
+
+    internal static class XNames
+    {
+        private static readonly XNamespace ns = XNamespace.Get("http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable");
+        public static XName Commands = ns + "Commands";
+        public static XName Buttons = ns + "Buttons";
+        public static XName Button = ns + "Button";
+        public static XName Symbols = ns + "Symbols";
+        public static XName GuidSymbol = ns + "GuidSymbol";
+        public static XName IDSymbol = ns + "IDSymbol";
+    }
+    internal static class NameGenerator
+    {
+        public static string GenerateCommandIDName(string id) => string.Format("{0}CommandId", id);
+        public static string GenerateExecuteCommandMethodName(string id) => string.Format("OnExecute{0}", CodeIdentifier.MakePascal(id));
+    }
+
+    internal static class NamespaceImports
+    {
+        public static CodeNamespaceImport System = new CodeNamespaceImport("System");
+        public static CodeNamespaceImport SystemComponentModelDesign = new CodeNamespaceImport("System.ComponentModel.Design");
+        public static CodeNamespaceImport MicrosoftVisualStudioShell = new CodeNamespaceImport("Microsoft.VisualStudio.Shell");
+    }
+
+    internal static class References
+    {
+        public static CodeTypeReference Object = new CodeTypeReference(typeof(object));
+        public static CodeTypeReference String = new CodeTypeReference(typeof(string));
+        public static CodeTypeReference Void = new CodeTypeReference(typeof(void));
+        public static CodeTypeReference Int = new CodeTypeReference(typeof(int));
+        public static CodeTypeReference Guid = new CodeTypeReference(nameof(Guid));
+        public static CodeTypeReference EventHandler = new CodeTypeReference(Constants.ClassNames.EventHandler);
+        public static CodeTypeReference EventArgs = new CodeTypeReference(Constants.ClassNames.EventArgs);
+        public static CodeTypeReference CommandID = new CodeTypeReference(Constants.ClassNames.CommandID);
+        public static CodeTypeReference CommandHandler = new CodeTypeReference(Constants.ClassNames.CommandHandler);
+        public static CodeTypeReference OleMenuCommand = new CodeTypeReference(Constants.ClassNames.OleMenuCommand);
+        public static CodeTypeReference OleMenuCommandService = new CodeTypeReference(Constants.ClassNames.OleMenuCommandService);
+    }
+
+public class Manager
+{
+    internal class Block
+    {
+        public string Name;
+        public int Start, Length;
+    }
+    private Block currentBlock;
+    private List<Block> files = new List<Block>();
+    private Block footer = new Block();
+    private Block header = new Block();
+    private ITextTemplatingEngineHost host;
+    private StringBuilder template;
+    protected List<string> generatedFileNames = new List<string>();
+    public static Manager Create(ITextTemplatingEngineHost host, StringBuilder template)
+    {
+        return (host is IServiceProvider) ? new VSManager(host, template) : new Manager(host, template);
+    }
+    public void StartNewFile(string name)
+    {
+        if (name == null)
+            throw new ArgumentNullException("name");
+        CurrentBlock = new Block { Name = name };
+    }
+    public void StartFooter()
+    {
+        CurrentBlock = footer;
+    }
+    public void StartHeader()
+    {
+        CurrentBlock = header;
+    }
+    public void EndBlock()
+    {
+        if (CurrentBlock == null)
+            return;
+        CurrentBlock.Length = template.Length - CurrentBlock.Start;
+        if (CurrentBlock != header && CurrentBlock != footer)
+            files.Add(CurrentBlock);
+        currentBlock = null;
+    }
+    public virtual void Process(bool split)
+    {
+        if (split)
+        {
+            EndBlock();
+            string headerText = template.ToString(header.Start, header.Length);
+            string footerText = template.ToString(footer.Start, footer.Length);
+            string outputPath = Path.GetDirectoryName(host.TemplateFile);
+            files.Reverse();
+            foreach (Block block in files)
+            {
+                string fileName = Path.Combine(outputPath, block.Name);
+                string content = headerText + template.ToString(block.Start, block.Length) + footerText;
+                generatedFileNames.Add(fileName);
+                CreateFile(fileName, content);
+                template.Remove(block.Start, block.Length);
+            }
+        }
+    }
+    protected virtual void CreateFile(string fileName, string content)
+    {
+        if (IsFileContentDifferent(fileName, content))
+            File.WriteAllText(fileName, content);
+    }
+    public virtual string GetCustomToolNamespace(string fileName)
+    {
+        return null;
+    }
+    public virtual string DefaultProjectNamespace
+    {
+        get { return null; }
+    }
+    protected bool IsFileContentDifferent(string fileName, string newContent)
+    {
+        return !(File.Exists(fileName) && File.ReadAllText(fileName) == newContent);
+    }
+    private Manager(ITextTemplatingEngineHost host, StringBuilder template)
+    {
+        this.host = host;
+        this.template = template;
+    }
+    private Block CurrentBlock
+    {
+        get { return currentBlock; }
+        set
+        {
+            if (CurrentBlock != null)
+                EndBlock();
+            if (value != null)
+                value.Start = template.Length;
+            currentBlock = value;
+        }
+    }
+    internal class VSManager : Manager
+    {
+        private EnvDTE.ProjectItem templateProjectItem;
+        private EnvDTE.DTE dte;
+        private Action<string> checkOutAction;
+        private Action<IEnumerable<string>> projectSyncAction;
+        public override string DefaultProjectNamespace
+        {
+            get
+            {
+                return templateProjectItem.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
+            }
+        }
+        public override string GetCustomToolNamespace(string fileName)
+        {
+            return dte.Solution.FindProjectItem(fileName).Properties.Item("CustomToolNamespace").Value.ToString();
+        }
+        public override void Process(bool split)
+        {
+            if (templateProjectItem.ProjectItems == null)
+                return;
+            base.Process(split);
+            projectSyncAction.EndInvoke(projectSyncAction.BeginInvoke(generatedFileNames, null, null));
+        }
+        protected override void CreateFile(string fileName, string content)
+        {
+            if (IsFileContentDifferent(fileName, content))
+            {
+                CheckoutFileIfRequired(fileName);
+                File.WriteAllText(fileName, content);
+            }
+        }
+        internal VSManager(ITextTemplatingEngineHost host, StringBuilder template)
+            : base(host, template)
+        {
+            IServiceProvider hostServiceProvider = (IServiceProvider)host;
+            if (hostServiceProvider == null)
+                throw new ArgumentNullException("Could not obtain IServiceProvider");
+            dte = (EnvDTE.DTE)hostServiceProvider.GetService(typeof(EnvDTE.DTE));
+            if (dte == null)
+                throw new ArgumentNullException("Could not obtain DTE from host");
+            templateProjectItem = dte.Solution.FindProjectItem(host.TemplateFile);
+            checkOutAction = (string fileName) => dte.SourceControl.CheckOutItem(fileName);
+            projectSyncAction = (IEnumerable<string> keepFileNames) => ProjectSync(templateProjectItem, keepFileNames);
+        }
+        private static void ProjectSync(EnvDTE.ProjectItem templateProjectItem, IEnumerable<string> keepFileNames)
+        {
+            HashSet<string> keepFileNameSet = new HashSet<string>(keepFileNames);
+            Dictionary<string, EnvDTE.ProjectItem> projectFiles = new Dictionary<string, EnvDTE.ProjectItem>();
+            string originalFilePrefix = Path.GetFileNameWithoutExtension(templateProjectItem.get_FileNames(0)) + ".";
+            foreach (EnvDTE.ProjectItem projectItem in templateProjectItem.ProjectItems)
+                projectFiles.Add(projectItem.get_FileNames(0), projectItem);
+            // Remove unused items from the project
+            foreach (KeyValuePair<string, EnvDTE.ProjectItem> pair in projectFiles)
+                if (!keepFileNames.Contains(pair.Key) && !(Path.GetFileNameWithoutExtension(pair.Key) + ".").StartsWith(originalFilePrefix))
+                    pair.Value.Delete();
+            // Add missing files to the project
+            foreach (string fileName in keepFileNameSet)
+                if (!projectFiles.ContainsKey(fileName))
+                    templateProjectItem.ProjectItems.AddFromFile(fileName);
+        }
+        private void CheckoutFileIfRequired(string fileName)
+        {
+            EnvDTE.SourceControl sc = dte.SourceControl;
+            if (sc != null && sc.IsItemUnderSCC(fileName) && !sc.IsItemCheckedOut(fileName))
+                checkOutAction.EndInvoke(checkOutAction.BeginInvoke(fileName, null, null));
+        }
+    }
+}
+#>

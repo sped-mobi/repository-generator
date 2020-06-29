@@ -1,0 +1,79 @@
+<Project>
+
+
+
+  <PropertyGroup>
+    
+    <SourceExtensionVsixManifestPath>$(MSBuildProjectDirectory)\source.extension.vsixmanifest</SourceExtensionVsixManifestPath>
+
+
+    <IsVsixProject>false</IsVsixProject>
+    <IsVsixProject Condition="Exists('$(SourceExtensionVsixManifestPath)')">true</IsVsixProject>
+
+    <IsVsPackageProject>false</IsVsPackageProject>
+    <IsVsPackageProject Condition="'$(GeneratePkgDefFile)'=='true' AND '$(CreateVsixContainer)'=='false'">true</IsVsPackageProject>
+
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SystemIOCompressionZipFileVersion>4.3.0</SystemIOCompressionZipFileVersion>
+    <MicrosoftVisualStudioSDKVersion>16.0.200</MicrosoftVisualStudioSDKVersion>
+    <MicrosoftVSSDKBuildToolsVersion>16.2.1033-develop-geb07a8be</MicrosoftVSSDKBuildToolsVersion>
+  </PropertyGroup>
+  
+  
+  <!--
+  
+  *** NOTE: Stick the proper PropertyGroup below before the first Sdk element or Import element in a project file ***
+  
+  === VSIX Project ===
+  
+  <PropertyGroup>
+    <UsingToolVsSDK>true</UsingToolVsSDK>
+    <AssemblyName>SomeName.vsix</AssemblyName>
+    <RootNamespace>SomeName.vsix</RootNamespace>
+    <TargetVsixContainerName>SomeName.vsix</TargetVsixContainerName>
+  </PropertyGroup>
+  
+  
+  === VSPackage Project ===
+  
+  <PropertyGroup>   
+    <UsingToolVsSDK>true</UsingToolVsSDK>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <CreateVsixContainer>false</CreateVsixContainer>    
+    <RootNamespace>SomeName</RootNamespace>
+    <AssemblyName>SomeName</AssemblyName>
+  </PropertyGroup>
+  
+  -->
+
+  <Choose>
+    <When Condition="'$(Configuration)'=='Debug'">
+      <PropertyGroup>
+        <IncludeDebugSymbolsInVSIXContainer>true</IncludeDebugSymbolsInVSIXContainer>
+        <IncludeDebugSymbolsInLocalVSIXDeployment>true</IncludeDebugSymbolsInLocalVSIXDeployment>
+        <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+        <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
+      </PropertyGroup>
+      <PropertyGroup>
+        <DebugType>full</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+        <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+        <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+        <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+      </PropertyGroup>
+      <PropertyGroup>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+  
+  
+</Project>

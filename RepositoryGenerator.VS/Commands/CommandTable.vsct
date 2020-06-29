@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Extern href="KnownImageIds.vsct" />
+
+  <Commands package="Package">
+    <Menus>
+      <Menu guid="PackageMenus" id="IDM_REPOSITORY" type="Menu" priority="0x0000">
+        <Strings>
+          <ButtonText>Repository</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+
+    <Groups>
+      <Group guid="PackageGroups" id="IDG_REPOSITORY" priority="0x0000"/>
+    </Groups>
+
+    <Buttons>
+      
+      <Button guid="PackageCommands" id="NewRepositoryCommand" type="Button" priority="0x0000">
+        <Icon guid="ImageCatalogGuid" id="Git"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>New Repository...</ButtonText>
+        </Strings>
+      </Button>
+
+    </Buttons>
+
+  </Commands>
+
+  <CommandPlacements>
+
+    <CommandPlacement guid="PackageCommands" id="NewRepositoryCommand" priority="0x0001">
+      <Parent guid="PackageGroups" id="IDG_REPOSITORY"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="PackageGroups" id="IDG_REPOSITORY" priority="0x0001">
+      <Parent guid="PackageMenus" id="IDM_REPOSITORY"/>
+    </CommandPlacement>
+
+    <CommandPlacement guid="PackageMenus" id="IDM_REPOSITORY" priority="0x0700">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS"/>
+    </CommandPlacement>
+
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="Package" value="{4B4FD064-E258-459C-A0DA-A6315F13B8AE}" />
+
+    <GuidSymbol name="PackageMenus" value="{EA586EFE-CCF9-40BC-A7EA-2E9DB032DA99}">
+      <IDSymbol name="IDM_REPOSITORY" value="0x0101"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="PackageGroups" value="{92D56DDA-8958-44F3-ADE7-61EC4594119B}">
+      <IDSymbol name="IDG_REPOSITORY" value="0x0011"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="PackageCommands" value="{EF5F7C51-37E0-4574-831F-BF3215D6395C}">
+      <IDSymbol name="NewRepositoryCommand" value="0x0001"/>
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

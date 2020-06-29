@@ -1,0 +1,104 @@
+﻿<Project>
+  <PropertyGroup>
+    
+    <UsingToolVsSDK>true</UsingToolVsSDK>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <CreateVsixContainer>false</CreateVsixContainer>
+    
+    <RootNamespace>Microsoft.VisualStudio.RepositoryGenerator</RootNamespace>
+    <AssemblyName>Microsoft.VisualStudio.RepositoryGenerator.VS</AssemblyName>
+    <TargetFramework>net48</TargetFramework>
+    
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <ItemGroup>
+    <None Remove="Themes\Generic.xaml" />
+    <None Remove="Themes\Theme.xaml" />
+    <None Remove="Themes\ThemeBase.xaml" />
+    <None Remove="Themes\ThemedButton.xaml" />
+    <None Remove="Themes\ThemedComboBox.xaml" />
+    <None Remove="UI\NewRepositoryDialog.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Theme.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\ThemeBase.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\ThemedButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\ThemedComboBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\NewRepositoryDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\RepositoryGenerator.Abstractions\RepositoryGenerator.Abstractions.csproj" />
+  </ItemGroup>
+  
+    <!--<ItemGroup>
+      <Reference Include="PresentationCore" />
+      <Reference Include="PresentationFramework" />
+      <Reference Include="System.Xaml" />
+      <Reference Include="WindowsBase" />
+    </ItemGroup>-->
+  
+
+  <ItemGroup>
+    <None Update="Commands\CommandTable.vsct">
+    </None>
+    <None Update="Commands\MenuCommandGenerator.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>MenuCommandGenerator.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <VSCTCompile Include="Commands\CommandTable.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="VSPackage.resx">
+      <MergeWithCTO>true</MergeWithCTO>
+      <ManifestResourceName>VSPackage</ManifestResourceName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Commands\MenuCommandGenerator.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MenuCommandGenerator.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Update="UI\NewRepositoryDialog.xaml.cs">
+      <DependentUpon>NewRepositoryDialog.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

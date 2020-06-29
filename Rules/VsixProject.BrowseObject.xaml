@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--  Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.  -->
+<Rule
+    xmlns="http://schemas.microsoft.com/build/2009/properties"
+    Name="ConfigurationGeneralBrowseObject"
+    Description="Project Properties"
+    DisplayName="General"
+    OverrideMode="Extend"
+    PageTemplate="generic"
+    PropertyPagesHidden="true">
+    <Rule.Categories>
+        <Category
+            Name="VSIX"
+            Description="VSIX"
+            DisplayName="VSIX" />
+        <Category
+            Name="Advanced"
+            Description="Advanced"
+            DisplayName="Advanced" />
+        <Category
+            Name="Misc"
+            Description="Misc"
+            DisplayName="Misc" />
+    </Rule.Categories>
+
+    <Rule.DataSource>
+        <DataSource
+            HasConfigurationCondition="False"
+            Persistence="ProjectFile"
+            SourceOfDefaultValue="AfterContext" />
+    </Rule.DataSource>
+
+    <BoolProperty
+        Name="IsVsixProject"
+        Category="Misc"
+        Description="Specifies if the project produces a *.vsix container"
+        DisplayName="Is VSIX Project"
+	ReadOnly="true" />
+
+    <BoolProperty
+        Name="IsVsPackageProject"
+        Category="Misc"
+        Description="Specifies if the project produces a *.pkgdef file"
+        DisplayName="Is VSPackage Project"
+	ReadOnly="true" />
+
+    <BoolProperty
+        Name="IncludeAssemblyInVSIXContainer"
+        Category="VSIX"
+        Default="false"
+        Description="Specifies if the project output assembly will be included in the VSIX container."
+        DisplayName="Include Assembly in VSIX Container" />
+
+    <BoolProperty
+        Name="IncludeDebugSymbolsInVSIXContainer"
+        Category="VSIX"
+        Default="false"
+        Description="Specifies if the project output debug symbols will be included in the VSIX container."
+        DisplayName="Include Debug Symbols in VSIX Container" />
+
+    <BoolProperty
+        Name="IncludeDebugSymbolsInLocalVSIXDeployment"
+        Category="VSIX"
+        Default="true"
+        Description="Specifies if the project output debug symbols will be included in the local deployment."
+        DisplayName="Include Debug Symbols in Local Deployment" />
+
+    <BoolProperty
+        Name="CopyBuildOutputToOutputDirectory"
+        Category="Advanced"
+        Default="true"
+        Description="Specifies if the project output assembly will be copied to the output directory."
+        DisplayName="Copy Build Output to Output Directory" />
+
+
+    <BoolProperty
+        Name="CopyOutputSymbolsToOutputDirectory"
+        Category="Advanced"
+        Default="true"
+        Description="Specifies if the project output debug symbols will be copied to the output directory."
+        DisplayName="Copy Output Symbols to Output Directory" />
+
+    <BoolProperty
+        Name="GeneratePkgDefFile"
+        Category="VSIX"
+        Default="true"
+        Description="Specifies if the .pkgdef file will be generated for the output assembly."
+        DisplayName="Generate .pkgdef File" />
+
+    <BoolProperty
+        Name="CreateVsixContainer"
+        Category="VSIX"
+        Default="true"
+        Description=""
+        DisplayName="Create Vsix Container" />
+
+    <BoolProperty
+        Name="DeployExtension"
+        Category="VSIX"
+        Default="true"
+        Description="Deploys the extension to the experimental instance."
+        DisplayName="Deploy Extension" />
+
+    <StringProperty
+        Name="VSIXSubPath"
+        Category="VSIX"
+        Description="Specifies the subpath under the InstallRoot where the file will be installed."
+        DisplayName="VSIX Sub Path" />
+
+    <EnumProperty
+        Name="InstallRoot"
+        Category="VSIX"
+        Description="Specifies which root directory to install the file. By default, the file will be installed to the extension directory."
+        DisplayName="Install Root">
+        <EnumProperty.AdmissibleValues>
+            <EnumValue Name="Default" IsDefault="True" />
+            <EnumValue Name="MSBuild" />
+            <EnumValue Name="Schemas" />
+            <EnumValue Name="PublicAssemblies" />
+            <EnumValue Name="Licenses" />
+            <EnumValue Name="ReferenceAssemblies" />
+            <EnumValue Name="RemoteDebugger" />
+            <EnumValue Name="VCTargets" />
+        </EnumProperty.AdmissibleValues>
+    </EnumProperty>
+
+
+    <BoolProperty
+        Name="Ngen"
+        Category="Ngen"
+        Description="Specifies if the assembly should be installed via ngen when the extension is installed.  NOTE: This setting will not affect dependencies referenced by this assembly.  Ngen is a tool that improves the performance of managed applications by installing pre-compiled processor-specific machine code in the native image cache on the local computer."
+        DisplayName="Ngen" />
+
+
+    <StringProperty
+        Name="NgenApplication"
+        Category="Ngen"
+        Description="Specifies the application to pass into ngen via the /ExeConfig switch."
+        DisplayName="Ngen Application" />
+
+    <EnumProperty
+        Name="NgenArchitecture"
+        Category="Ngen"
+        Description="Specifies the target architecture for the native image."
+        DisplayName="Ngen Architecture">
+        <EnumProperty.AdmissibleValues>
+            <EnumValue Name="NotSpecified" IsDefault="True" />
+            <EnumValue Name="X86" />
+            <EnumValue Name="X64" />
+            <EnumValue Name="All" />
+        </EnumProperty.AdmissibleValues>
+    </EnumProperty>
+
+    <StringProperty
+        Name="NgenPriority"
+        Category="Ngen"
+        Default="3"
+        Description="Specifies the ngen priority level."
+        DisplayName="Ngen Priority" />
+</Rule>

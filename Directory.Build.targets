@@ -1,0 +1,44 @@
+<Project>
+
+  <ItemDefinitionGroup Condition="'$(UseCommonOutputDirectory)' == 'true'">
+    <Reference>
+      <Private>false</Private>
+    </Reference>
+
+    <ProjectReference>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
+  <Import Project="$(_WpfTempProjectNuGetFileNameNoExt).targets" Condition="'$(_WpfTempProjectNuGetFileNameNoExt)' != '' and Exists('$(_WpfTempProjectNuGetFileNameNoExt).targets')"/>
+
+
+  <Import Project="VisualStudio.targets" Condition="'$(UsingToolVsSDK)'=='true'"/>
+
+  <PropertyGroup>
+    <GeneratedGlobalSuppressionsFile>$(IntermediateOutputPath)GeneratedGlobalSuppressions.cs</GeneratedGlobalSuppressionsFile>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <SuppressMessage>
+      <Visible>False</Visible>
+    </SuppressMessage>
+  </ItemDefinitionGroup>
+
+  <ItemGroup>
+    <SuppressMessage Include="$(NoWarn)" />
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <CoreCompileDependsOn>GenerateGlobalSuppressionsFile;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>
+  <Target Name="GenerateGlobalSuppressionsFile" Inputs="$(MSBuildThisFileFullPath);$(MSBuildProjectFile)" Outputs="$(GeneratedGlobalSuppressionsFile)" DependsOnTargets="PrepareForBuild" Condition="'@(SuppressMessage)'!=''">
+    <CreateItem Include="System.Diagnostics.CodeAnalysis.SuppressMessageAttribute" AdditionalMetadata="_Parameter1=;_Parameter2=%(SuppressMessage.Identity)" Condition="'@(SuppressMessage)'!=''">
+      <Output TaskParameter="Include" ItemName="SuppressMessageAttribute" />
+    </CreateItem>
+    <WriteCodeFragment AssemblyAttributes="@(SuppressMessageAttribute)" Language="$(Language)" OutputFile="$(GeneratedGlobalSuppressionsFile)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
+    </WriteCodeFragment>
+  </Target>
+
+</Project>

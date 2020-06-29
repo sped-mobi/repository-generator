@@ -1,0 +1,19 @@
+﻿<Project>
+  <PropertyGroup>
+    <RootNamespace>Microsoft.VisualStudio.RepositoryGenerator</RootNamespace>
+    <AssemblyName>Microsoft.VisualStudio.RepositoryGenerator.Abstractions</AssemblyName>
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+  <ItemGroup>
+    <Reference Include="System.Xaml" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.ComponentModel.Composition" />
+  </ItemGroup>
+  
+  
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

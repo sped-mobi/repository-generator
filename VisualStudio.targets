@@ -1,0 +1,123 @@
+<Project>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Compression.ZipFile" Version="$(SystemIOCompressionZipFileVersion)"/>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="$(MicrosoftVisualStudioSDKVersion)" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="$(MicrosoftVSSDKBuildToolsVersion)" />
+  </ItemGroup>
+
+  <Choose>
+    <When Condition="'$(IsVsixProject)'=='true'">
+      <PropertyGroup>
+        <DeployExtension>true</DeployExtension>
+        <GeneratePkgDefFile>false</GeneratePkgDefFile>
+        <CreateVsixContainer>true</CreateVsixContainer>
+        <ImportVsSDKRules>true</ImportVsSDKRules>
+        <CopyVsixManifestToOutput>true</CopyVsixManifestToOutput>
+        <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
+      </PropertyGroup>
+      <PropertyGroup>
+        <StartAction>Program</StartAction>
+        <StartProgram Condition="'$(DevEnvDir)' != ''">$(DevEnvDir)devenv.exe</StartProgram>
+        <StartArguments>/rootsuffix Exp</StartArguments>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+  <Choose>
+    <When Condition="'$(IsVsPackageProject)'=='true'">
+      <PropertyGroup>
+        <UseCodeBase>true</UseCodeBase>
+        <DeployExtension>false</DeployExtension>
+        <GeneratePkgDefFile>true</GeneratePkgDefFile>
+        <CreateVsixContainer>false</CreateVsixContainer>
+        <CopyVsixManifestToOutput>false</CopyVsixManifestToOutput>
+        <ImportVsSDKRules>true</ImportVsSDKRules>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+
+  <Choose>
+    <When Condition="'$(ImportVsSDKRules)'=='true'">
+      <ItemGroup>
+        <PropertyPageSchema Include="$(RulesDirectory)VsixProject.BrowseObject.xaml">
+          <Context>Project;BrowseObject</Context>
+        </PropertyPageSchema>
+      </ItemGroup>
+    </When>
+  </Choose>
+
+  <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
+
+  <Target Name="VSIXIdentifierProjectOutputGroup" Condition="'$(CreateVsixContainer)' == 'false'" />
+  <Target Name="VSIXNameProjectOutputGroup" Condition="'$(CreateVsixContainer)' == 'false'" />
+
+
+  <!--<Target Name="IncludeNuGetResolvedAssets" AfterTargets="ResolveReferences" Condition="'$(IsVsixProject)'=='true'">
+    <ItemGroup>
+      <_ReferenceCopyLocalPathsWithPotentialInclusions Include="@(ReferenceCopyLocalPaths)" />
+      <VSIXCopyLocalReferenceSourceItem Include="@(_ReferenceCopyLocalPathsWithPotentialInclusions)" Condition="'%(_ReferenceCopyLocalPathsWithPotentialInclusions.Extension)' != '.pdb'">
+        <ForceIncludeInVsix>true</ForceIncludeInVsix>
+        <Private>true</Private>
+      </VSIXCopyLocalReferenceSourceItem>
+    </ItemGroup>
+  </Target>-->
+
+
+  <Target Name="CustomLinkVSSDKEmbeddableAssemblies" AfterTargets="LinkVSSDKEmbeddableAssemblies">
+    <ItemGroup>
+      <ReferencePath Condition="
+              '%(FileName)' == 'Microsoft.VisualStudio.Setup.Configuration.Interop'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Embeddable'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.12.0'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.12.1.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.14.0.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.15.0.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.15.3.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.15.7.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.15.8.DesignTime'
+           or '%(Filename)' == 'Microsoft.VisualStudio.Imaging.Interop.14.0.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.TextManager.Interop.12.1.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.ProjectSystem.Interop'
+           or '%(FileName)' == 'stdole'
+           or '%(FileName)' == 'Microsoft.VisualStudio.CommandBars'
+           or '%(FileName)' == 'NuGet.SolutionRestoreManager.Interop'
+           or '%(FileName)' == 'NuGet.VisualStudio'
+           or '%(FileName)' == 'VSLangProj110'">
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </ReferencePath>
+      <ReferencePath Condition="
+              '%(FileName)' == 'Microsoft.VisualStudio.Imaging.Interop.15.0.DesignTime'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.10.0'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Shell.Interop.11.0'
+           or '%(FileName)' == 'Microsoft.VisualStudio.Feedback.Interop.12.0.DesignTime'
+           or '%(FileName)' == 'microsoft.visualstudio.designer.interfaces'
+           or '%(FileName)' == 'EnvDTE80'
+           or '%(FileName)' == 'EnvDTE90'
+           or '%(FileName)' == 'EnvDTE100'
+           or '%(FileName)' == 'Microsoft.Internal.VisualStudio.Shell.Interop.14.1.DesignTime'
+           or '%(FileName)' == 'Microsoft.Internal.VisualStudio.Shell.Interop.14.2.DesignTime'">
+        <EmbedInteropTypes>false</EmbedInteropTypes>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+
+
+  <Target Name="CopyVsixToOutput" AfterTargets="CreateVsixContainer" Condition="'$(IsVsixProject)'=='true'">
+    <PropertyGroup>
+      <VSSDKDirectory>$(ArtifactsDirectory)\VSSDK\</VSSDKDirectory>
+      <FinalVsixPath>$(VSSDKDirectory)$(TargetVsixContainerName)</FinalVsixPath>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(VSSDKDirectory)" Condition="Exists('$(VSSDKDirectory)')" />
+    
+    <MakeDir Directories="$(VSSDKDirectory)" Condition="!Exists('$(VSSDKDirectory)')"/>
+
+    <Copy SourceFiles="$(TargetVsixContainer)" DestinationFiles="$(FinalVsixPath)" />
+
+    <Message Importance="high" Text="OUTPUT VSIX --> $(FinalVsixPath)"/>
+    
+  </Target>
+
+</Project>

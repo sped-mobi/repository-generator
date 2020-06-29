@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="repository-generator" Version="1.0" Language="en-US" Publisher="Brad Marshall" />
+    <DisplayName>Repository Generator</DisplayName>
+    <Description xml:space="preserve">Adds a menu command to generate a repository with a complete, self-contained build solution.</Description>
+    <License>License.txt</License>
+    <GettingStartedGuide>GettingStarted.html</GettingStartedGuide>
+    <ReleaseNotes>ReleaseNotes.html</ReleaseNotes>
+    <Icon>Repository.png</Icon>
+    <PreviewImage>Repository.png</PreviewImage>
+    <Tags>repo, vsix</Tags>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.6,)" />
+  </Dependencies>
+  <Assets>    
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="RepositoryGenerator.Abstractions" Path="|RepositoryGenerator.Abstractions|" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="RepositoryGenerator.Implementation" Path="|RepositoryGenerator.Implementation|" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="RepositoryGenerator.VS" Path="|RepositoryGenerator.VS|" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="RepositoryGenerator.VS" Path="|RepositoryGenerator.VS;PkgdefProjectOutputGroup|" />
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="RepositoryGenerator.Implementation" Path="|RepositoryGenerator.Implementation;PkgdefProjectOutputGroup|" />
+  </Assets>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,17.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+</PackageManifest>

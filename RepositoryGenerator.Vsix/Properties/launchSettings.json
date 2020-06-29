@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Current Instance": {
+      "commandName": "Executable",
+      "executablePath": "$(DevEnvDir)devenv.exe",
+      "commandLineArgs": "/rootsuffix Exp"
+    }
+  }
+}
